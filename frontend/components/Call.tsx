@@ -7,7 +7,8 @@ import { RetellWebClient } from "retell-client-js-sdk";
 import Link from "next/link";
 import Retell from "retell-sdk";
 
-const agentId = "agent_110ec14f030bee9043e4e971e7";
+// CHANGE THIS TO YOUR OWN AGENT ID!!
+const agentId = "agent_b05745e9359591babb4d234db8";
 
 interface RegisterCallResponse {
   access_token: string;
