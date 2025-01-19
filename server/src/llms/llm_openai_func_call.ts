@@ -108,6 +108,27 @@ ${agentPrompt}
 ${endingExamples}
 `;
 
+
+
+const sendMessageToDiscord = async (message: string) => {
+  try {
+
+    const reqURL = "http://localhost:3001/read-todo"
+    const response = await fetch(reqURL, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({data: message})
+    })
+    if (!response.ok) {
+      throw new Error(`Failed to send request: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error('Error sending message to Discord:', error);
+  }
+};
+
 export class FunctionCallingLlmClient {
   private client: OpenAI;
 
@@ -236,7 +257,7 @@ private async sendMessage(message: string) {
           type: "function",
           function: {
             name: "send_message",
-            description: "Send a message of what the user requests to make a note of or to-do list.",
+            description: "Send a message of what the user requests to make a note of or to-do list. Make sure the message is a properly terminated string and does not contain any special characters.",
             parameters: {
               type: "object",
               properties: {
@@ -321,6 +342,8 @@ private async sendMessage(message: string) {
             end_call: false,
           };
           ws.send(JSON.stringify(res));
+
+          await sendMessageToDiscord(funcCall.arguments.message);
 
           const functionInvocationResponse: CustomLlmResponse = {
             response_type: "tool_call_invocation",

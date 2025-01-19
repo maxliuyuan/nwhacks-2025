@@ -45,8 +45,17 @@ class Bot:
             body = await request.json()
             feedback = body.get("data")
             if channel:
-                print("good morning gang")
                 await channel.send(f"feedback analysis: {feedback}")
+            return {"status": "ok"}
+        
+    def setup_routes(self):
+        @self.app.post("/read-todo")
+        async def read_todo(request: Request):
+            channel = self.client.get_channel(channel_id)
+            body = await request.json()
+            todo = body.get("data")
+            if channel:
+                await channel.send(f"To-Do List: {todo}")
             return {"status": "ok"}
 
         @self.app.get("/shutdown")
