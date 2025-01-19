@@ -87,15 +87,11 @@ class Ducky:
     def run(self):
         listen_thread = threading.Thread(target=self.listen)
         uvicorn_thread = threading.Thread(target=lambda : uvicorn.run(self.app, host="127.0.0.1", port=8000))
-        # input_thread = threading.Thread(target=self.userInput)
 
         listen_thread.start()
         uvicorn_thread.start()
-        # input_thread.start()
-
 
         listen_thread.join()
-        # input_thread.join()
         self.kms()
 
 # Usage
