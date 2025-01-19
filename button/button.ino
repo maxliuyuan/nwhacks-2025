@@ -1,15 +1,20 @@
 #include <Servo.h>
 
-int BTN_PIN = 8;
+// button shit
+const int BTN_PIN = 8;
 int STATE = 0;               
 int PREV_STATE = LOW;        
 int BUTTON_STATE;           
 unsigned long last_changed = 0; 
 const int LATENCY = 50;
-Servo servo;
 
+// servo shit
+Servo servo;
+int pos = 0;
+const int SERVO_PIN = 9;
 
 void setup() {
+  servo.attach(SERVO_PIN);
   Serial.begin(9600);
   pinMode(BTN_PIN, INPUT_PULLUP); 
 }
@@ -23,8 +28,6 @@ void button_handler() {
 
     if (BUTTON_STATE == LOW) {
       STATE ^= 1;
-      Serial.print("state: ");
-      Serial.println(STATE);
     }
   }
 
@@ -36,7 +39,10 @@ void get_sound() {
 }
 
 void run_servo() {
-  
+  for (pos = 0; pos <= 10; pos += 2) {
+    servo.write(pos);
+
+  }
 }
 
 
