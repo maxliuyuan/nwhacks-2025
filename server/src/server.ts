@@ -48,7 +48,7 @@ export class Server {
   private httpServer: HTTPServer;
   public app: expressWs.Application;
 
-  construcr() {
+  constructor() {
     this.app = expressWs(express()).app;
     this.httpServer = createServer(this.app);
     this.app.use(express.json());
