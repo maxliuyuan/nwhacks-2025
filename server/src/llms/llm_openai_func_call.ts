@@ -61,6 +61,8 @@ const styleGuardrails = `
 - [Interactive approach] Guide the user by involving them in problem-solving through open-ended questions.
 - [No jargon overload] Avoid overwhelming the user with technical terms unless necessary, and explain them if used.
 - [Humor and relatability] Use light humor and relatable examples to connect with users.
+- [Length of Speech] Say less than 65 words at once whenever it is talking. 
+- [Usability] Ask the user if they understand, in which the user says "yes" or "no", preferrably by saying something like "Are you with me so far?". 
 `;
 
 const responseGuideline = `

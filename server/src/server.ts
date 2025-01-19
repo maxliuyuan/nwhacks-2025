@@ -48,7 +48,7 @@ export class Server {
   private httpServer: HTTPServer;
   public app: expressWs.Application;
 
-  constructor() {
+  construcr() {
     this.app = expressWs(express()).app;
     this.httpServer = createServer(this.app);
     this.app.use(express.json());
@@ -103,7 +103,7 @@ export class Server {
             console.log(analysisData);
             // fs.writeFileSync("./feedback.json", , "utf-8");
             // console.log("Call analysis saved to 'feedback.json'.");
-            const reqURL = DISCORD_URL + "/read-analysis"
+            const reqURL = DISCORD_URL + "/analyze-and-shutdown"
             const response = await fetch(reqURL, {
               method: "POST",
               headers: {

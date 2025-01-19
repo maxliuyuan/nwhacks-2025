@@ -57,10 +57,25 @@ class Bot:
             if channel:
                 await channel.send(f"\n**To-Do List:**\n{todo}")
             return {"status": "ok"}
-
+        
         @self.app.get("/shutdown")
         async def shutdown():
             channel = self.client.get_channel(channel_id)
+            if channel:
+                await channel.send("================================Session Ended================================")
+            await self.client.close()
+            await asyncio.sleep(5)
+            self.kms()
+            return {"status": "shutting down"}
+
+        @self.app.post("/analyze-and-shutdown")
+        async def analyze_shutdown(request: Request):
+            channel = self.client.get_channel(channel_id)
+            body = await request.json()
+            feedback = body.get("data")
+            if channel:
+                await channel.send(f"**\nFeedback Analysis:**\n{feedback}")
+        
             if channel:
                 await channel.send("================================Session Ended================================")
             await self.client.close()
