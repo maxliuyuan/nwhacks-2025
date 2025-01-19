@@ -15,7 +15,7 @@ const int SERVO_PIN = 9;
 
 void setup() {
   servo.attach(SERVO_PIN);
-  Serial.begin(9600);
+  Serial.begin(9600); // Initialize serial communication
   pinMode(BTN_PIN, INPUT_PULLUP); 
 }
 
@@ -28,31 +28,22 @@ void button_handler() {
 
     if (BUTTON_STATE == LOW) {
       STATE ^= 1;
+      Serial.println("Button Pressed"); // Send signal to the computer
     }
   }
 
   PREV_STATE = BUTTON_STATE;
 }
 
-void get_sound() {
-
-}
-
 void run_servo() {
   for (pos = 0; pos <= 10; pos += 2) {
     servo.write(pos);
-
   }
 }
-
-
 
 void loop() {
   button_handler();
   if (STATE) {
-    get_sound();
     run_servo();
-
   }
-
 }
