@@ -30,6 +30,7 @@ const Call = ({
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
 
   const url = "http://127.0.0.1:8000";
+  const url2 = "http://127.0.0.1:3001"
 
   // CHANGE YOUR API KEY HERE
   const retellClient = new Retell({
@@ -71,9 +72,40 @@ const Call = ({
         console.error("Error registering call:", err);
         throw new Error("Failed to register call");
       }
+
+      try {
+        console.log(`${url2}/shutdown`);
+        const response = await fetch(`${url2}/shutdown`, {
+          method: "GET"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+      } catch (err) {
+        console.error("Error registering call:", err);
+        throw new Error("Failed to register call");
+      }
+    }
+
+    async function processCall() {
+      try {
+        console.log(`${url2}/`);
+        const response = await fetch(`${url}/`, {
+          method: "GET"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+      } catch (err) {
+        console.error("Error registering call:", err);
+        throw new Error("Failed to register call");
+      }
     }
 
     retellWebClient.on("call_started", () => {
+      processCall()
       console.log("call started");
     });
 
