@@ -8,7 +8,7 @@ import {
   Utterance,
 } from "../types";
 
-const beginSentence = "aaaa";
+const beginSentence = "Quack quack";
 
 const task = `
 aaaaaa
@@ -56,13 +56,17 @@ const endingExamples = `
 aaaaa
 `;
 
+// const systemPrompt = `
+// ${objective}
+// ${styleGuardrails}
+// ${responseGuideline}
+// ## Role
+// ${agentPrompt}
+// ${endingExamples}
+// `;
+
 const systemPrompt = `
-${objective}
-${styleGuardrails}
-${responseGuideline}
-## Role
-${agentPrompt}
-${endingExamples}
+You are a friendly rubber duck debugging assistant from Sesame Street.
 `;
 
 export class FunctionCallingLlmClient {
