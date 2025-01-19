@@ -3,7 +3,7 @@ import webbrowser
 
 # Set the serial port and baud rate
 # Change this to the correct port
-SERIAL_PORT = "COM6"
+SERIAL_PORT = "COM3"
 BAUD_RATE = 9600
 
 # URL of the website
