@@ -13,7 +13,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 intents = discord.Intents.default()
 intents.message_content = True
-channel_id = 1330484653852725258
+channel_id = 1330600895074795611
 
 class Bot:
     def __init__(self):
@@ -37,25 +37,25 @@ class Bot:
                 return
             if message.content.startswith('penis'):
                 await message.channel.send('cock')
-
+ 
     def setup_routes(self):
         @self.app.post("/read-analysis")
         async def read_analysis(request: Request):
             channel = self.client.get_channel(channel_id)
             body = await request.json()
             feedback = body.get("data")
+            print(feedback)
             if channel:
-                await channel.send(f"feedback analysis: {feedback}")
+                await channel.send(f"**\nFeedback Analysis:**\n{feedback}")
             return {"status": "ok"}
         
-    def setup_routes(self):
         @self.app.post("/read-todo")
         async def read_todo(request: Request):
             channel = self.client.get_channel(channel_id)
             body = await request.json()
             todo = body.get("data")
             if channel:
-                await channel.send(f"To-Do List: {todo}")
+                await channel.send(f"\n**To-Do List:**\n{todo}")
             return {"status": "ok"}
 
         @self.app.get("/shutdown")

@@ -257,7 +257,7 @@ private async sendMessage(message: string) {
           type: "function",
           function: {
             name: "send_message",
-            description: "Send a message of what the user requests to make a note of or to-do list. Make sure the message is a properly terminated string and does not contain any special characters.",
+            description: "Send a message of what the user requests to make a note of or to-do list. Make sure the message is a properly terminated string and does not contain any special characters. Make it short and concise. Maximum 100 words.",
             parameters: {
               type: "object",
               properties: {

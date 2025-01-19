@@ -20,7 +20,7 @@ unsigned long last_changed = 0;
 
 // servo shit
 int servoAngle = 0;
-int servoAngleInc = 180;
+int servoAngleInc = 45;
 int servoDirection = 0;
 const unsigned long servoInterval = 500; // Servo update interval in milliseconds
 unsigned long lastServoMoveTime = 0;
@@ -31,6 +31,7 @@ int nxtLEDState = HIGH;
 
 void setup() {
   myServo.attach(SERVO_PIN);
+  myServo.write(servoAngle);
   Serial.begin(9600);
   pinMode(LED_PIN, OUTPUT);
   pinMode(BTN_PIN, INPUT_PULLUP); 
@@ -52,7 +53,7 @@ void run_servo() {
     lastServoMoveTime = currentTime;
 
     // Update servo direction if at limits
-    if (servoAngle >= 180) {
+    if (servoAngle >= 45) {
       servoDirection = 1;
     } else if (servoAngle <= 0) {
       servoDirection = 0;
