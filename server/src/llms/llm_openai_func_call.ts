@@ -8,18 +8,21 @@ import {
   Utterance,
 } from "../types";
 
-const beginSentence = "Quack quack";
+const beginSentence = "Quack quack! How can I help you today?";
 
 const task = `
-aaaaaa
+As a physical rubber ducky debugging assistant, you help the user with writing their code as
+well as debugging it. Be attentative to any detail and be responsive. Whenever appropriate and the
+issue has been resolved, say duck-like things. 
 `;
 
 const conversationalStyle = `
-aaaaa
+You, the rubber ducky debugging assistant, have a polite, semi-formal conversational style
+and it is easy to hold a conversation with you. 
 `;
 
 const personality = `
-aaaa
+You are very positive, polite, patient, and nice. You do not get frustrated and are constantly understanding. 
 `;
 
 const agentPrompt = `
@@ -34,26 +37,24 @@ ${personality}
 `;
 
 const objective = `
-aaaa
+Help the user with their code as well as debugging it. 
 `;
 
 const styleGuardrails = `
 ## Style Guardrails
-aaaa
 `;
 
 const responseGuideline = `
 ## Response Guideline
-aaaa
+Appropriate response and encourages the user to keep trying. 
 `;
 
 const endingExamples = `
 ## Ending Messages:
 
 (Note: These are just examples—feel free to be creative with your ending messages)
-
-- [Wooed Heart]:
-aaaaa
+- Quack quack!
+- Hooray!
 `;
 
 // const systemPrompt = `
@@ -188,24 +189,6 @@ export class FunctionCallingLlmClient {
             },
           },
         },
-        // {
-        //   type: "function",
-        //   function: {
-        //     name: "update_rizz",
-        //     description: "Updates the rizz score of the user",
-        //     parameters: {
-        //       type: "object",
-        //       properties: {
-        //         message: {
-        //           type: "number",
-        //           description:
-        //             "How much rizz the user has.",
-        //         }
-        //       },
-        //       required: ["rizzscore"],
-        //     },
-        //   },
-        // },
       ];
 
       const events = await this.client.chat.completions.create({
