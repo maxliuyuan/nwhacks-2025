@@ -11,7 +11,7 @@ export default function CallPage() {
     setStartCall(true); // Trigger call start when the page loads
   }, []);
 
-  // Function to update the agent talking state and analyze rizz
+  // Function to update the agent talking state
   const handleAgentTalkingChange = async (isTalking: boolean, updateObject: any) => {
     setIsAgentTalking(isTalking);
 
