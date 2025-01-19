@@ -14,6 +14,7 @@ class Listening(Enum):
 class Ducky:
     def __init__(self, port, baud_rate):
         self.terminate = False
+        self.buttonOn = 0
         self.ser = serial.Serial(port, baud_rate)
         self.listening_state = Listening.OFF
         self.app = FastAPI()
@@ -29,6 +30,9 @@ class Ducky:
         def move_ducky(state: str):
             print("move state:", state)
             self.ser.write(state.encode())
+        @self.app.get("/shutdown")
+        def shutdown():
+            self.terminate = True
                 
     def toggle_listening(self):
         if self.listening_state == Listening.OFF:
@@ -45,22 +49,24 @@ class Ducky:
                 if line == "BUTTON_PRESS":
                     self.toggle_listening()
                     print("Listening:", self.listening_state.name)
+                    # self.terminate = True
+
             if (self.terminate):
                 self.ser.write('0'.encode())
                 print("\nExiting...")
                 self.ser.close()
                 break
 
-    def userInput(self):
-        while (True):
-            try:
-                user_input = input()
-                if (user_input == "shutdown"):  # add sigint
-                    self.terminate = True
-                    break
-            except:
-                self.terminate = True
-                break
+    # def userInput(self):
+    #     while (True):
+    #         try:
+    #             user_input = input()
+    #             if (user_input == "shutdown" or self.terminate == True):
+    #                 self.terminate = True
+    #                 break
+    #         except:
+    #             self.terminate = True
+    #             break
     
     def kms(self):
         os.kill(os.getpid(), signal.SIGINT)
@@ -69,15 +75,15 @@ class Ducky:
     def run(self):
         listen_thread = threading.Thread(target=self.listen)
         uvicorn_thread = threading.Thread(target=lambda : uvicorn.run(self.app, host="127.0.0.1", port=8000))
-        input_thread = threading.Thread(target=self.userInput)
+        # input_thread = threading.Thread(target=self.userInput)
 
         listen_thread.start()
         uvicorn_thread.start()
-        input_thread.start()
+        # input_thread.start()
 
 
         listen_thread.join()
-        input_thread.join()
+        # input_thread.join()
         self.kms()
 
 # Usage
