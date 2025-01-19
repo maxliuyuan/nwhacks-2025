@@ -5,11 +5,9 @@ from enum import Enum
 import threading
 import os
 import signal
-from pydantic import BaseModel
 import webbrowser
 from fastapi.middleware.cors import CORSMiddleware
-
-
+import subprocess
 
 class Listening(Enum):
     OFF = 0
@@ -29,7 +27,8 @@ class Ducky:
             allow_credentials=True,
             allow_methods=["*"],  # Allow all HTTP methods
             allow_headers=["*"],  # Allow all headers
-)
+        )
+        subprocess.Popen(['python', 'discord/bot.py'])
 
     def setup_routes(self):
         @self.app.get("/")
@@ -39,8 +38,8 @@ class Ducky:
 
         @self.app.get("/move-ducky")
         def move_ducky(state: str):
-            print("move state:", state)
             self.ser.write(state.encode())
+
         @self.app.get("/shutdown")
         def shutdown():
             self.terminate = True
@@ -56,7 +55,6 @@ class Ducky:
         while True:
             if self.ser.in_waiting > 0:
                 line = self.ser.readline().decode('utf-8').strip()
-                print(f"Received: {line}")
                 if line == "BUTTON_PRESS":
                     self.toggle_listening()
                     print("Listening:", self.listening_state.name)
