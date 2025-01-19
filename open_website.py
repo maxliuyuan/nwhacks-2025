@@ -8,7 +8,7 @@ BAUD_RATE = 9600
 
 # URL of the website
 # Replace with website's URL
-URL = "www.harrypotter.com"
+URL = "http://localhost:3000/"
 
 def main():
     try:
