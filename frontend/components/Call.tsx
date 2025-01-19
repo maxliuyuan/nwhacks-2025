@@ -25,7 +25,6 @@ const Call = ({
   onAgentTalkingChange: (isTalking: boolean, userTranscript: string) => void;
 }) => {
   const [isCalling, setIsCalling] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [transcriptContent, setTranscriptContent] = useState<string>("");
   const [callId, setCallId] = useState<string>("");
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
@@ -115,10 +114,7 @@ const Call = ({
     });
 
     retellWebClient.on("update", (update) => {
-      // if (update.transcript.length > 0) {
-      //   const latestContent = update.transcript[update.transcript.length - 1]?.content;
-      //   setTranscriptContent(latestContent);
-      // }
+      console.log("update", update);
     });
 
     retellWebClient.on("error", (error) => {
@@ -127,20 +123,22 @@ const Call = ({
     });
   }, [startCall]);
 
-  // Fetch the call analysis once the callId is set and the call has ended
-  // useEffect(() => {
-  //   const fetchAnalysis = async () => {
-  //     if (callId && !isCalling) { // Check if the call has ended and the callId is set
-  //       setIsLoadingAnalysis(true); // Start loading animation
-  //       await delay(5000); // Delay before fetching analysis
-  //       const callAnalysis = await getCallAnalysis(callId);
-  //     }
-  //   };
-  //
-  //   if (callId && !isCalling) {
-  //     // fetchAnalysis();
-  //   }
-  // }, [callId, isCalling]);
+  //Fetch the call analysis once the callId is set and the call has ended
+  useEffect(() => {
+    const fetchAnalysis = async () => {
+      if (callId && !isCalling) { // Check if the call has ended and the callId is set
+        await delay(5000); // Delay before fetching analysis
+        const callAnalysis = await getCallAnalysis(callId);
+        console.log("Call analysis:", callAnalysis);
+      }
+    };
+  
+    if (callId && !isCalling) {
+      fetchAnalysis();
+    }
+  }, [callId, isCalling]);
+
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   async function registerCall(agentId: string): Promise<RegisterCallResponse> {
     try {
@@ -171,24 +169,24 @@ const Call = ({
     }
   }
 
-  // async function getCallAnalysis(callId: string) {
-  //   try {
-  //     const response = await retellClient.call.retrieve(callId);
-  //     if (response.call_analysis && response.call_analysis.custom_analysis_data) {
-  //       const customAnalysisData = response.call_analysis.custom_analysis_data;
-  //       if (customAnalysisData.analysis_results) {
-  //         return customAnalysisData.analysis_results;
-  //       } else {
-  //         throw new Error("analysis not found in custom analysis data");
-  //       }
-  //     } else {
-  //       throw new Error("No call analysis or custom analysis data available");
-  //     }
-  //   } catch (err) {
-  //     console.error("Error fetching call analysis:", err);
-  //     return "Error retrieving results";
-  //   }
-  // }
+  async function getCallAnalysis(callId: string) {
+    try {
+      const response = await retellClient.call.retrieve(callId);
+      if (response.call_analysis && response.call_analysis.custom_analysis_data) {
+        const customAnalysisData: { feedback?: string } = response.call_analysis.custom_analysis_data;
+        if (customAnalysisData.feedback) {
+          return customAnalysisData.feedback;
+        } else {
+          throw new Error("Analysis not found in custom analysis data");
+        }
+      } else {
+        throw new Error("No call analysis or custom analysis data available");
+      }
+    } catch (err) {
+      console.error("Error fetching call analysis:", err);
+      return "Error retrieving results";
+    }
+  }
 
   return (
     <h1>Rubber Ducky Debugging Assistant</h1>
