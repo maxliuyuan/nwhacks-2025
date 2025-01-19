@@ -12,6 +12,7 @@ import { FunctionCallingLlmClient } from "./llms/llm_openai_func_call";
 // import { FunctionCallingLlmClient } from "./llms/llm_azure_openai_func_call_end_call";
 // import { FunctionCallingLlmClient } from "./llms/llm_azure_openai_func_call";
 // import { DemoLlmClient } from "./llms/llm_openrouter";
+import fs from "fs";
 
 
 const client = new Retell({
@@ -92,6 +93,15 @@ export class Server {
           try {
             const analysis = await getCallAnalysis(callId); // Call the function to fetch analysis
             console.log("Call analysis:", analysis);
+
+            // Write the analysis feedback to a JSON file at the root level of the repo
+            const analysisData = {
+              callId: callId,
+              feedback: analysis,
+            };
+            fs.writeFileSync("./feedback.json", JSON.stringify(analysisData, null, 2), "utf-8");
+            console.log("Call analysis saved to 'feedback.json'.");
+
             // Optionally, you could send this analysis back to the client or store it for later use
           } catch (err) {
             console.error("Error fetching call analysis:", err);
