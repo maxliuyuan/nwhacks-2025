@@ -13,6 +13,35 @@ import { FunctionCallingLlmClient } from "./llms/llm_openai_func_call";
 // import { FunctionCallingLlmClient } from "./llms/llm_azure_openai_func_call";
 // import { DemoLlmClient } from "./llms/llm_openrouter";
 
+
+const client = new Retell({
+  apiKey: process.env.RETELL_API_KEY, // Make sure to store the API key in an environment variable
+});
+
+/**
+ * Fetches the feedback text from the analysis of a call using the Retell API.
+ * @param {string} callId - The ID of the call to retrieve the analysis for.
+ * @returns {Promise<string>} - The feedback text from the call analysis.
+ */
+export async function getCallAnalysis(callId: string): Promise<string> {
+  try {
+    // Retrieve the call analysis from Retell using the provided callId
+    const callResponse = await client.call.retrieve(callId);
+
+    // Extract and return only the feedback from the custom_analysis_data
+    const feedback = (callResponse.call_analysis?.custom_analysis_data as { feedback?: string })?.feedback;
+
+    if (feedback) {
+      return feedback; // Return the feedback text
+    } else {
+      throw new Error('No feedback available in the call analysis.');
+    }
+  } catch (error) {
+    console.error('Error fetching call analysis:', error);
+    throw error; // Rethrow the error to be handled by the caller function
+  }
+}
+
 export class Server {
   private httpServer: HTTPServer;
   public app: expressWs.Application;
@@ -36,12 +65,12 @@ export class Server {
   /* Handle webhook from Retell server. This is used to receive events from Retell server.
      Including call_started, call_ended, call_analyzed */
   handleWebhook() {
-    this.app.post("/webhook", (req: Request, res: Response) => {
+    this.app.post("/webhook", async (req: Request, res: Response) => {
       if (
         !Retell.verify(
           JSON.stringify(req.body),
           process.env.RETELL_API_KEY,
-          req.headers["x-retell-signature"] as string,
+          req.headers["x-retell-signature"] as string
         )
       ) {
         console.error("Invalid signature");
@@ -57,6 +86,17 @@ export class Server {
           break;
         case "call_analyzed":
           console.log("Call analyzed event received", content.data.call_id);
+
+          // Once the call is analyzed, fetch the analysis for the call
+          const callId = content.data.call_id;
+          try {
+            const analysis = await getCallAnalysis(callId); // Call the function to fetch analysis
+            console.log("Call analysis:", analysis);
+            // Optionally, you could send this analysis back to the client or store it for later use
+          } catch (err) {
+            console.error("Error fetching call analysis:", err);
+          }
+
           break;
         default:
           console.log("Received an unknown event:", content.event);
