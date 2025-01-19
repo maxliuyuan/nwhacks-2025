@@ -94,9 +94,8 @@ export class Server {
             const analysis = await getCallAnalysis(callId); // Call the function to fetch analysis
             console.log("Call analysis:", analysis);
 
-            // Write the analysis feedback to a JSON file at the root level of the repo
+            // Write the analysis feedback to a JSON file in server folder
             const analysisData = {
-              callId: callId,
               feedback: analysis,
             };
             fs.writeFileSync("./feedback.json", JSON.stringify(analysisData, null, 2), "utf-8");
