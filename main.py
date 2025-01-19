@@ -14,7 +14,6 @@ class Listening(Enum):
 class Ducky:
     def __init__(self, port, baud_rate):
         self.terminate = False
-        self.buttonOn = 0
         self.ser = serial.Serial(port, baud_rate)
         self.listening_state = Listening.OFF
         self.app = FastAPI()
@@ -49,8 +48,9 @@ class Ducky:
                 if line == "BUTTON_PRESS":
                     self.toggle_listening()
                     print("Listening:", self.listening_state.name)
-                    # self.terminate = True
-
+                    if (self.listening_state.name == Listening.OFF):
+                        self.terminate = True
+                        
             if (self.terminate):
                 self.ser.write('0'.encode())
                 print("\nExiting...")
