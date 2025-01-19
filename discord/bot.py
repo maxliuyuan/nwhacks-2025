@@ -3,12 +3,10 @@ import discord
 from dotenv import load_dotenv
 from fastapi import FastAPI
 import uvicorn
-from enum import Enum
 import threading
-import os
+import asyncio
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import asyncio
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -16,6 +14,10 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 intents = discord.Intents.default()
 intents.message_content = True
+
+# This class is used to send messages to Discord through FastAPI
+class Message(BaseModel):
+    content: str
 
 class Bot:
     def __init__(self):
@@ -45,12 +47,14 @@ class Bot:
     def setup_routes(self):
         @self.app.get("/")
         def read_root():
-            print("laskjdlakjdlaskjd")
+            return {"message": "Bot is running!"}
 
-        @self.app.get("/shutdown")
-        def shutdown():
-            # parse json shit
-            pass
+        @self.app.post("/send_message/")
+        async def send_message(message: Message):
+            # This route will send a message to Discord channel
+            channel = self.client.get_channel(int(os.getenv('DISCORD_CHANNEL_ID')))  # Your channel ID here
+            await channel.send(message.content)
+            return {"status": "Message sent successfully"}
 
     async def runClient(self):
         await self.client.start(TOKEN)
@@ -71,5 +75,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-    
-    

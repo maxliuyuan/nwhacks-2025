@@ -7,6 +7,7 @@ import {
   ResponseRequiredRequest,
   Utterance,
 } from "../types";
+import axios from "axios";
 
 const beginSentence = "Hello there! I'm your friendly Rubber Ducky Debugging Assistant. What seems to be the problem?";
 
@@ -107,6 +108,17 @@ ${responseGuideline}
 ${agentPrompt}
 ${endingExamples}
 `;
+
+const sendMessageToDiscord = async (message: string) => {
+  try {
+    const response = await axios.post('http://127.0.0.1:3001/send_message/', {
+      content: message,
+    });
+    console.log('Message sent to Discord:', response.data);
+  } catch (error) {
+    console.error('Error sending message to Discord:', error);
+  }
+};
 
 export class FunctionCallingLlmClient {
   private client: OpenAI;
@@ -236,7 +248,7 @@ private async sendMessage(message: string) {
           type: "function",
           function: {
             name: "send_message",
-            description: "Send a message of what the user requests to make a note of or to-do list.",
+            description: "Send a message of what the user requests to make a note of or to-do list. Make sure the message is a properly terminated string and does not contain any special characters.",
             parameters: {
               type: "object",
               properties: {
@@ -321,6 +333,8 @@ private async sendMessage(message: string) {
             end_call: false,
           };
           ws.send(JSON.stringify(res));
+
+          await sendMessageToDiscord(funcCall.arguments.message);
 
           const functionInvocationResponse: CustomLlmResponse = {
             response_type: "tool_call_invocation",
