@@ -18,7 +18,7 @@ def main():
             while True:
                 if ser.in_waiting > 0:
                     line = ser.readline().decode("utf-8").strip()
-                    if line == "Button Pressed":
+                    if line == "BUTTON_PRESS":
                         print("Opening website...")
                         webbrowser.open(URL)
     except serial.SerialException as e:

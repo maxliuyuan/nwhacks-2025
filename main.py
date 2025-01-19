@@ -1,5 +1,6 @@
 import serial
 from fastapi import FastAPI
+import uvicorn
 from enum import Enum
 
 class Listening(Enum):
@@ -20,8 +21,9 @@ class Ducky:
             return
 
         @self.app.get("/move-ducky")
-        def move_ducky(state: int):
-            self.ser.write(state)
+        def move_ducky(state: str):
+            print("move state:", state)
+            self.ser.write(state.encode())
                 
     def toggle_listening(self):
         if self.listening_state == Listening.OFF:
@@ -53,6 +55,5 @@ app = ducky.app
 
 # Run the application (if runninrg the script directly)
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
-    ducky.listen()
+    # ducky.listen()
