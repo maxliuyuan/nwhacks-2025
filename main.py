@@ -31,8 +31,14 @@ class ButtonListener:
         finally:
             self.ser.close()
 
+    def write(self):
+        while True:
+            userInput = input()
+            self.ser.write(userInput.encode())
+
 # Usage
 arduino_port = 'COM3'  # Change this to your Arduino's port
 baud_rate = 9600
 listener = ButtonListener(arduino_port, baud_rate)
-listener.listen()
+# listener.listen()
+listener.write()

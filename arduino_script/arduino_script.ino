@@ -58,7 +58,6 @@ void loop() {
   btnState = digitalRead(BTN_PIN);
 
   
-
   // Check if the button state has changed
   if (btnState == HIGH && lastBtnState == LOW) {
     // Push message to serial port
