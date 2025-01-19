@@ -195,12 +195,17 @@ export class FunctionCallingLlmClient {
   // Step 2: Prepare the function calling definition to the prompt
   // Done in tools import
 
+// Add send_message function logic
+private async sendMessage(message: string) {
+  console.log("Message to be noted/to-do list: ", message);
+  // You can also perform any additional actions here, such as storing the message in a database.
+}
+
   async DraftResponse(
     request: ResponseRequiredRequest | ReminderRequiredRequest,
     ws: WebSocket,
     funcResult?: FunctionCall,
   ) {
-    // If there are function call results, add it to prompt here.
     const requestMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] =
       this.PreparePrompt(request, funcResult);
 
@@ -227,35 +232,46 @@ export class FunctionCallingLlmClient {
             },
           },
         },
+        {
+          type: "function",
+          function: {
+            name: "send_message",
+            description: "Send a message of what the user requests to make a note of or to-do list.",
+            parameters: {
+              type: "object",
+              properties: {
+                message: {
+                  type: "string",
+                  description:
+                    "The message you will say before making a note of the user's request.",
+                },
+              },
+              required: ["message"],
+            },
+          },
+        },
       ];
 
       const events = await this.client.chat.completions.create({
         model: "gpt-4o",
-        // model: "gpt-4o-mini",
         messages: requestMessages,
         stream: true,
         temperature: 1.0,
         max_tokens: 200,
         frequency_penalty: 1.0,
         presence_penalty: 1.0,
-        // Step 3: Add the  function into your requests
         tools: tools,
       });
 
       for await (const event of events) {
         if (event.choices.length >= 1) {
           const delta = event.choices[0].delta;
-          //if (!delta || !delta.content) continue;
           if (!delta) continue;
 
-          // Step 4: Extract the functions
           if (delta.tool_calls && delta.tool_calls.length >= 1) {
             const toolCall = delta.tool_calls[0];
-            // Function calling here
             if (toolCall.id) {
               if (funcCall) {
-                // Another function received, old function complete, can break here
-                // You can also modify this to parse more functions to unlock parallel function calling
                 break;
               } else {
                 funcCall = {
@@ -265,7 +281,6 @@ export class FunctionCallingLlmClient {
                 };
               }
             } else {
-              // append argument
               funcArguments += toolCall.function?.arguments || "";
             }
           } else if (delta.content) {
@@ -284,9 +299,6 @@ export class FunctionCallingLlmClient {
       console.error("Error in gpt stream: ", err);
     } finally {
       if (funcCall != null) {
-        // Step 5: Call the functions
-
-        // If it's to end the call, simply send a lst message and end the call
         if (funcCall.funcName === "end_call") {
           funcCall.arguments = JSON.parse(funcArguments);
           const res: CustomLlmResponse = {
@@ -299,44 +311,38 @@ export class FunctionCallingLlmClient {
           ws.send(JSON.stringify(res));
         }
 
-        // If it's to book appointment, say something and book appointment at the same time
-        // and then say something after booking is done
-        if (funcCall.funcName === "book_appointment") {
+        if (funcCall.funcName === "send_message") {
           funcCall.arguments = JSON.parse(funcArguments);
           const res: CustomLlmResponse = {
             response_type: "response",
             response_id: request.response_id,
-            // LLM will return the function name along with the message property we define
-            // In this case, "The message you will say while setting up the appointment like 'one moment' "
             content: funcCall.arguments.message,
-            // If content_complete is false, it means AI will speak later.
-            // In our case, agent will say something to confirm the appointment, so we set it to false
             content_complete: false,
             end_call: false,
           };
           ws.send(JSON.stringify(res));
 
-          // To make the tool invocation show up in transcript
           const functionInvocationResponse: CustomLlmResponse = {
             response_type: "tool_call_invocation",
             tool_call_id: funcCall.id,
             name: funcCall.funcName,
-            arguments: JSON.stringify(funcCall.arguments)
+            arguments: JSON.stringify(funcCall.arguments),
           };
           ws.send(JSON.stringify(functionInvocationResponse));
 
-          // Sleep 2s to mimic the actual appointment booking
-          // Replace with your actual making appointment functions
-          await new Promise((r) => setTimeout(r, 2000));
-          funcCall.result = "Appointment booked successfully";
+          await new Promise((r) => setTimeout(r, 2000));  // Mimic message sending delay
 
-          // To make the tool result show up in transcript
+          funcCall.result = "Message sent successfully";
+
           const functionResult: CustomLlmResponse = {
             response_type: "tool_call_result",
             tool_call_id: funcCall.id,
-            content: "Appointment booked successfully",
+            content: "Message sent successfully",
           };
           ws.send(JSON.stringify(functionResult));
+
+          // Log the message after sending it
+          await this.sendMessage(funcCall.arguments.message);
 
           this.DraftResponse(request, ws, funcCall);
         }
