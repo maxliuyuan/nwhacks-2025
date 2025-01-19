@@ -28,7 +28,7 @@ class Ducky:
             allow_methods=["*"],  # Allow all HTTP methods
             allow_headers=["*"],  # Allow all headers
         )
-        subprocess.Popen(['python', 'discord/bot.py'])
+        # subprocess.Popen(['python', 'discord/bot.py'])
 
     def setup_routes(self):
         @self.app.get("/")

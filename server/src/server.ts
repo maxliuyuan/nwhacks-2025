@@ -14,6 +14,7 @@ import { FunctionCallingLlmClient } from "./llms/llm_openai_func_call";
 // import { DemoLlmClient } from "./llms/llm_openrouter";
 import fs from "fs";
 
+const DISCORD_URL = "http://localhost:3001";
 
 const client = new Retell({
   apiKey: process.env.RETELL_API_KEY, // Make sure to store the API key in an environment variable
@@ -96,11 +97,26 @@ export class Server {
 
             // Write the analysis feedback to a JSON file in server folder
             const analysisData = {
-              feedback: analysis,
+              data: analysis,
             };
-            fs.writeFileSync("./feedback.json", JSON.stringify(analysisData, null, 2), "utf-8");
-            console.log("Call analysis saved to 'feedback.json'.");
 
+            console.log(analysisData);
+            // fs.writeFileSync("./feedback.json", , "utf-8");
+            // console.log("Call analysis saved to 'feedback.json'.");
+            const reqURL = DISCORD_URL + "/read-analysis"
+            const response = await fetch(reqURL, {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(analysisData)
+            })
+            if (!response.ok) {
+              throw new Error(`Failed to send string: ${response.statusText}`);
+            }
+        
+            const result = await response.json(); // Parse response as JSON
+            console.log('API Response:', result);
             // Optionally, you could send this analysis back to the client or store it for later use
           } catch (err) {
             console.error("Error fetching call analysis:", err);

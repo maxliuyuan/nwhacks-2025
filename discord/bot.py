@@ -1,12 +1,8 @@
 import os
 import discord
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import uvicorn
-from enum import Enum
-import threading
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import datetime
 import signal
@@ -17,7 +13,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 intents = discord.Intents.default()
 intents.message_content = True
-channel_id = 1330484653852725258
+channel_id = 1330600895074795611
 
 class Bot:
     def __init__(self):
@@ -26,13 +22,6 @@ class Bot:
         self.client = discord.Client(intents=intents)
         self.setup_routes()
         self.setup_discord_events()
-        self.app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["http://localhost:3000"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
 
     def setup_discord_events(self):
         @self.client.event
@@ -50,12 +39,14 @@ class Bot:
                 await message.channel.send('cock')
 
     def setup_routes(self):
-        @self.app.get("/")
-        async def read_root():
+        @self.app.post("/read-analysis")
+        async def read_analysis(request: Request):
             channel = self.client.get_channel(channel_id)
+            body = await request.json()
+            feedback = body.get("data")
             if channel:
                 print("good morning gang")
-                await channel.send("endpoint accessed at: " + str(datetime.datetime.now()))
+                await channel.send(f"feedback analysis: {feedback}")
             return {"status": "ok"}
 
         @self.app.get("/shutdown")
@@ -71,23 +62,22 @@ class Bot:
     async def start_discord(self):
         await self.client.start(TOKEN)
 
-    def run_fastapi(self):
-        uvicorn.run(self.app, host="127.0.0.1", port=3001)
+    async def run_fastapi(self):
+        # Start FastAPI app in the same event loop
+        config = uvicorn.Config(self.app, host="127.0.0.1", port=3001)
+        server = uvicorn.Server(config)
+        await server.serve()
 
-    def run(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        
-        fastapi_thread = threading.Thread(target=self.run_fastapi)
-        fastapi_thread.start()
+    async def run(self):
+        # Create a task to run FastAPI and the discord bot concurrently
+        fastapi_task = asyncio.create_task(self.run_fastapi())
+        discord_task = asyncio.create_task(self.start_discord())
         
         try:
-            loop.run_until_complete(self.start_discord())
+            await asyncio.gather(fastapi_task, discord_task)
         except KeyboardInterrupt:
-            loop.run_until_complete(self.client.close())
-        finally:
-            loop.close()
+            await self.client.close()
 
 if __name__ == "__main__":
     bot = Bot()
-    bot.run()
+    asyncio.run(bot.run())

@@ -8,7 +8,7 @@ import Link from "next/link";
 import Retell from "retell-sdk";
 
 // CHANGE THIS TO YOUR OWN AGENT ID!!
-const agentId = "agent_110ec14f030bee9043e4e971e7";
+const agentId = "agent_b05745e9359591babb4d234db8";
 
 interface RegisterCallResponse {
   access_token: string;
@@ -34,7 +34,7 @@ const Call = ({
 
   // CHANGE YOUR API KEY HERE
   const retellClient = new Retell({
-    apiKey: "key_d6554601d8036dcdc45f43fa0214",
+    apiKey: "key_97507ab19561bc73916f72b04170",
   });
 
   console.log("apiKey", retellClient.apiKey);
@@ -73,19 +73,19 @@ const Call = ({
         throw new Error("Failed to register call");
       }
 
-      try {
-        console.log(`${url2}/shutdown`);
-        const response = await fetch(`${url2}/shutdown`, {
-          method: "GET"
-        });
+      // try {
+      //   console.log(`${url2}/shutdown`);
+      //   const response = await fetch(`${url2}/shutdown`, {
+      //     method: "GET"
+      //   });
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-      } catch (err) {
-        console.error("Error registering call:", err);
-        throw new Error("Failed to register call");
-      }
+      //   if (!response.ok) {
+      //     throw new Error(`Error: ${response.status}`);
+      //   }
+      // } catch (err) {
+      //   console.error("Error registering call:", err);
+      //   throw new Error("Failed to register call");
+      // }
     }
 
     async function processCall() {
