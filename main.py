@@ -5,6 +5,10 @@ from enum import Enum
 import threading
 import os
 import signal
+from pydantic import BaseModel
+import webbrowser
+from fastapi.middleware.cors import CORSMiddleware
+
 
 
 class Listening(Enum):
@@ -13,11 +17,19 @@ class Listening(Enum):
 
 class Ducky:
     def __init__(self, port, baud_rate):
+        self.URL = "http://localhost:3000/"
         self.terminate = False
         self.ser = serial.Serial(port, baud_rate)
         self.listening_state = Listening.OFF
         self.app = FastAPI()
         self.setup_routes()
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["http://localhost:3000"],  # Allow frontend to access
+            allow_credentials=True,
+            allow_methods=["*"],  # Allow all HTTP methods
+            allow_headers=["*"],  # Allow all headers
+)
 
     def setup_routes(self):
         @self.app.get("/")
@@ -48,9 +60,11 @@ class Ducky:
                 if line == "BUTTON_PRESS":
                     self.toggle_listening()
                     print("Listening:", self.listening_state.name)
-                    if (self.listening_state.name == Listening.OFF):
+                    if (self.listening_state == Listening.OFF):
                         self.terminate = True
-                        
+                    else:
+                        webbrowser.open(self.URL)
+
             if (self.terminate):
                 self.ser.write('0'.encode())
                 print("\nExiting...")

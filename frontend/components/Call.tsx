@@ -7,7 +7,7 @@ import { RetellWebClient } from "retell-client-js-sdk";
 import Link from "next/link";
 import Retell from "retell-sdk";
 
-const agentId = "agent_326df6ce5685fb8e6f66ab9ab5";
+const agentId = "agent_110ec14f030bee9043e4e971e7";
 
 interface RegisterCallResponse {
   access_token: string;
@@ -30,6 +30,8 @@ const Call = ({
   const [transcriptContent, setTranscriptContent] = useState<string>("");
   const [callId, setCallId] = useState<string>("");
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
+
+  const url = "http://127.0.0.1:8000";
 
   const retellClient = new Retell({
     apiKey: "key_ce6b06ad98cb7b99a09d84a5f733",
@@ -56,6 +58,22 @@ const Call = ({
       handleCall();
     }
 
+    async function endCall() {
+      try {
+        console.log(`${url}/shutdown`);
+        const response = await fetch(`${url}/shutdown`, {
+          method: "GET"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+      } catch (err) {
+        console.error("Error registering call:", err);
+        throw new Error("Failed to register call");
+      }
+    }
+
     retellWebClient.on("call_started", () => {
       console.log("call started");
     });
@@ -65,15 +83,35 @@ const Call = ({
       setIsCalling(false);
       onAgentTalkingChange(false, "");
       setShowListeningText(false);
+      endCall();
     });
 
+    async function toggleMove(state: number) {
+      try {
+        console.log(`${url}/move-ducky/?state=${state}`);
+        const response = await fetch(`${url}/move-ducky/?state=${state}`, {
+          method: "GET"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+      } catch (err) {
+        console.error("Error registering call:", err);
+        throw new Error("Failed to register call");
+      }
+    }
+    
     retellWebClient.on("agent_start_talking", () => {
       console.log("agent_start_talking");
+      toggleMove(1);
       onAgentTalkingChange(true, transcriptContent);
     });
 
     retellWebClient.on("agent_stop_talking", () => {
       console.log("agent_stop_talking");
+      toggleMove(0);
       onAgentTalkingChange(false, "");
     });
 
@@ -137,7 +175,7 @@ const Call = ({
 
   async function registerCall(agentId: string): Promise<RegisterCallResponse> {
     try {
-      const response = await fetch("/api/create-web-call", {
+      const response = await fetch("api/create-web-call", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
