@@ -13,7 +13,7 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 intents = discord.Intents.default()
 intents.message_content = True
-channel_id = 1330600895074795611
+channel_id = 1330484653852725258
 
 class Bot:
     def __init__(self):
@@ -29,7 +29,7 @@ class Bot:
             print(f'We have logged in as {self.client.user}')
             channel = self.client.get_channel(channel_id)
             if channel:
-                await channel.send("bot initialized at: " + str(datetime.datetime.now()))
+                await channel.send("=========================Session: " + str(datetime.datetime.now())[:19] + "===========================")
 
         @self.client.event
         async def on_message(message):
@@ -51,6 +51,9 @@ class Bot:
 
         @self.app.get("/shutdown")
         async def shutdown():
+            channel = self.client.get_channel(channel_id)
+            if channel:
+                await channel.send("================================Session Ended================================")
             await self.client.close()
             await asyncio.sleep(5)
             self.kms()
